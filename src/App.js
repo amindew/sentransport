@@ -41,6 +41,8 @@ l.depart.toLowerCase().includes(valeurRecherche.toLowerCase()) ||
 l.arrivee.toLowerCase().includes(valeurRecherche.toLowerCase()) ||
 l.numero.includes(valeurRecherche)
 );
+const [nbrRecherches, setNbrRecherches] = useState(0);
+
 
 function handleClickLigne(ligne) {
 if (ligneSelectionnee && ligneSelectionnee.id === ligne.id) {
@@ -55,13 +57,31 @@ return (
 <div className="App">
 <Header />
 <main className="contenu">
-<Recherche valeur={valeurRecherche}
-onChange={setValeurRecherche} />
-<p className="resultat-recherche">
-{lignesFiltrees.length} ligne
-{lignesFiltrees.length > 1 ? 's' : ''} trouvee
-{lignesFiltrees.length > 1 ? 's' : ''}
-</p>
+<p>Vous avez effectué {nbrRecherches} recherches.</p>
+
+
+<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+  <Recherche
+    valeur={valeurRecherche}
+    onChange={(val) => {
+         if (valeurRecherche === "" && val !== "") {
+         setNbrRecherches(nbrRecherches + 1); }
+    setValeurRecherche(val);
+    }}
+  />
+  <button onClick={() => setValeurRecherche("")}>Effacer</button>
+</div>
+
+
+{lignesFiltrees.length === 0 ? (
+  <p className="resultat-recherche-nulle">Aucune ligne trouvée</p>
+) : (
+  <p className="resultat-recherche">
+    {lignesFiltrees.length} ligne{lignesFiltrees.length > 1 ? 's' : ''} trouvée
+    {lignesFiltrees.length > 1 ? 's' : ''}
+  </p>
+)}
+
 {lignesFiltrees.map(ligne => (
 <LigneBus
 key={ligne.id}
