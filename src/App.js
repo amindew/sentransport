@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import Carte from './Carte';
 import Header from './Header';
 import Recherche from './Recherche';
 import LigneBus from './LigneBus';
@@ -32,6 +33,27 @@ function App() {
       });
   }, []);
 
+function chargerLignes() {
+  setChargement(true);
+  setNbrRecherches(0); 
+  fetch("http://localhost:5000/lignes")
+    .then(response => {
+      if (!response.ok) throw new Error("Erreur serveur : " + response.status);
+      return response.json();
+    })
+    .then(data => {
+      setLignes(data);
+      setChargement(false);
+    })
+    .catch(error => {
+      setErreur(error.message);
+      setChargement(false);
+    });
+} 
+useEffect(() => {
+  chargerLignes();
+}, []);
+
   const lignesFiltrees = lignes.filter(l =>
     l.depart.toLowerCase().includes(valeurRecherche.toLowerCase()) ||
     l.arrivee.toLowerCase().includes(valeurRecherche.toLowerCase()) ||
@@ -39,11 +61,13 @@ function App() {
   );
 
   function handleClickLigne(ligne) {
-    if (ligneSelectionnee && ligneSelectionnee.id === ligne.id) {
-      setLigneSelectionnee(null);
-    } else {
-      setLigneSelectionnee(ligne);
-    }
+  if (ligneSelectionnee && ligneSelectionnee.id === ligne.id) {
+    setLigneSelectionnee(null);
+   } else {
+    fetch(`http://localhost:5000/lignes/${ligne.id}`)
+      .then(response => response.json())
+      .then(data => setLigneSelectionnee(data));
+   }
   }
 
   if (chargement) {
@@ -89,7 +113,9 @@ function App() {
             }}
           />
           <button onClick={() => setValeurRecherche("")}>Effacer</button>
+          <button onClick={chargerLignes}>Recharger</button>
         </div>
+
 
         {lignesFiltrees.length === 0 ? (
           <p className="resultat-recherche-nulle">Aucune ligne trouvée</p>
@@ -112,6 +138,7 @@ function App() {
         ))}
 
         {ligneSelectionnee && <DetailLigne ligne={ligneSelectionnee} />}
+        <Carte />
       </main>
       <Footer />
     </div>
